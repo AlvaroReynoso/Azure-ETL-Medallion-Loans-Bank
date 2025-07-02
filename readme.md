@@ -1,6 +1,6 @@
 # 🏦 Proyecto ETL End-to-End: Modelo Medallón aplicado a Préstamos Bancarios
 
-##📌 Objetivos del pipeline
+## 📌 Objetivos del pipeline
   -Implementar un flujo modular y escalable de procesamiento de datos.
 
   -Mantener trazabilidad y versionado en cada capa.
