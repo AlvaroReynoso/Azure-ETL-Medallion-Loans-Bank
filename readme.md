@@ -1,13 +1,13 @@
 # 🏦 Proyecto ETL End-to-End: Modelo Medallón aplicado a Préstamos Bancarios
 
-📌 Objetivos del pipeline:
--Implementar un flujo modular y escalable de procesamiento de datos.
+##📌 Objetivos del pipeline
+  -Implementar un flujo modular y escalable de procesamiento de datos.
 
--Mantener trazabilidad y versionado en cada capa.
+  -Mantener trazabilidad y versionado en cada capa.
 
--Preparar datos confiables para toma de decisiones bancarias.
+  -Preparar datos confiables para toma de decisiones bancarias.
 
--Automatizar procesos con ADF y ejecutar lógica con PySpark.
+  -Automatizar procesos con ADF y ejecutar lógica con PySpark.
 
 Este proyecto implementa un pipeline **ETL de punta a punta** utilizando el enfoque del **Modelo Medallón (Bronze, Silver, Gold)**, aplicado a un **caso de negocio real del sector bancario**, específicamente sobre datos de **préstamos**. 
 
