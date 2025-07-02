@@ -48,6 +48,7 @@ El método **Medallón** se basa en un enfoque estructurado por capas:
 
 Para más información detallada sobre la arquitectura, transformaciones y decisiones técnicas, podés consultar el siguiente documento:
 
-👉 **[Ver archivo Word con documentación completa]([./ruta/del/archivo/Documentacion_ETL_Bancario.docx](https://github.com/user-attachments/files/21026473/Proyecto.Final.Data.Engineer.pdf))**
+👉 **[Proyecto Final Data Engineer.pdf](https://github.com/user-attachments/files/21026490/Proyecto.Final.Data.Engineer.pdf)**
+
 
 > Incluye esquemas, ejemplos, descripciones técnicas, y justificación de decisiones a lo largo del pipeline.
