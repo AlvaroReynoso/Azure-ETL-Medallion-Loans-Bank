@@ -48,7 +48,7 @@ El método **Medallón** se basa en un enfoque estructurado por capas:
 
 Para más información detallada sobre la arquitectura, transformaciones y decisiones técnicas, podés consultar el siguiente documento:
 
-👉 ** [Proyecto Final Data Engineer.pdf](https://github.com/user-attachments/files/21026502/Proyecto.Final.Data.Engineer.pdf) **
+👉 [Proyecto Final Data Engineer.pdf](https://github.com/user-attachments/files/21026502/Proyecto.Final.Data.Engineer.pdf)
 
 
 
