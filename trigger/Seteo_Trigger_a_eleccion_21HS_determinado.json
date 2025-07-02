@@ -18,7 +18,7 @@
 				"frequency": "Minute",
 				"interval": 45,
 				"startTime": "2025-07-01T21:00:00",
-				"endTime": "2025-07-01T22:00:00",
+				"endTime": "2025-07-31T22:00:00",
 				"timeZone": "E. South America Standard Time"
 			}
 		}
