@@ -1,0 +1,1591 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Nombre de instancia de Data Factory",
+			"defaultValue": "midatafactoryalvaro"
+		},
+		"LS_DataLake_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"LS_DataLake\""
+		},
+		"LS_SQL_Database_password": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"password\"de \"LS_SQL_Database\""
+		},
+		"LS_conexion_storage_general_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"LS_conexion_storage_general\""
+		},
+		"LS_databricks_medallion_accessToken": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"accessToken\"de \"LS_databricks_medallion\""
+		},
+		"LS_SQL_Database_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "alvaroserver.database.windows.net"
+		},
+		"LS_SQL_Database_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "DB_loan_project"
+		},
+		"LS_SQL_Database_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adminalvaro"
+		},
+		"LS_databricks_medallion_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0627-011511-guaf4c1k"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_DataLake')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_DataLake_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQL_Database')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('LS_SQL_Database_properties_typeProperties_server')]",
+					"database": "[parameters('LS_SQL_Database_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_SQL_Database_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_SQL_Database_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_conexion_storage_general')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_conexion_storage_general_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_databricks_medallion')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-1033454553945759.19.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('LS_databricks_medallion_accessToken')]"
+					},
+					"existingClusterId": "[parameters('LS_databricks_medallion_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/check_trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 30,
+						"startTime": "2025-07-01T14:49:00",
+						"timeZone": "E. South America Standard Time"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_accounts')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_conexion_storage_general",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "accounts.csv",
+						"folderPath": "csv_loans",
+						"container": "containerraw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "account_id",
+						"type": "String"
+					},
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "account_type",
+						"type": "String"
+					},
+					{
+						"name": "balance",
+						"type": "String"
+					},
+					{
+						"name": "opened_date",
+						"type": "String"
+					},
+					{
+						"name": "created_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_conexion_storage_general')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_customers')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_conexion_storage_general",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "customers.csv",
+						"folderPath": "csv_loans",
+						"container": "containerraw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "name",
+						"type": "String"
+					},
+					{
+						"name": "address",
+						"type": "String"
+					},
+					{
+						"name": "phone_number",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "birth_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_conexion_storage_general')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_enriched_final')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_enricheds"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "enrichedfinished"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_loan_payments')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_conexion_storage_general",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "loan_payments.csv",
+						"folderPath": "csv_loans",
+						"container": "containerraw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "payment_id",
+						"type": "String"
+					},
+					{
+						"name": "loan_id",
+						"type": "String"
+					},
+					{
+						"name": "payment_date",
+						"type": "String"
+					},
+					{
+						"name": "amount_paid",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_conexion_storage_general')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_loans')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_conexion_storage_general",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "loans.csv",
+						"folderPath": "csv_loans",
+						"container": "containerraw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "loan_id",
+						"type": "String"
+					},
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "amount",
+						"type": "String"
+					},
+					{
+						"name": "interest_rate",
+						"type": "String"
+					},
+					{
+						"name": "start_date",
+						"type": "String"
+					},
+					{
+						"name": "status",
+						"type": "String"
+					},
+					{
+						"name": "loan_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_conexion_storage_general')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_raw_storage_DB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws_storages"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "origenPrestamosBanco",
+						"container": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "account_id",
+						"type": "String"
+					},
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "account_type",
+						"type": "String"
+					},
+					{
+						"name": "balance",
+						"type": "String"
+					},
+					{
+						"name": "opened_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_raw_storage_general')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_conexion_storage_general",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws_storages"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "csv_loans",
+						"container": "containerraw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_conexion_storage_general')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_CSV_transactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_conexion_storage_general",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_CSV_raws"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "transactions.csv",
+						"folderPath": "csv_loans",
+						"container": "containerraw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "transaction_id",
+						"type": "String"
+					},
+					{
+						"name": "account_id",
+						"type": "String"
+					},
+					{
+						"name": "date",
+						"type": "String"
+					},
+					{
+						"name": "type",
+						"type": "String"
+					},
+					{
+						"name": "amount",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "transaction_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_conexion_storage_general')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_accounts')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Database",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_SQL_Tables"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "account_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "customer_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "account_type",
+						"type": "varchar"
+					},
+					{
+						"name": "balance",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "opened_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "created_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "account"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Database')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_customers')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Database",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_SQL_Tables"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "name",
+						"type": "varchar"
+					},
+					{
+						"name": "address",
+						"type": "varchar"
+					},
+					{
+						"name": "phone_number",
+						"type": "varchar"
+					},
+					{
+						"name": "email",
+						"type": "varchar"
+					},
+					{
+						"name": "birth_date",
+						"type": "date"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "customers"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Database')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_loan_payments')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Database",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_SQL_Tables"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "payment_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "loan_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "payment_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "amount_paid",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "loan_payments"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Database')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_loans')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Database",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_SQL_Tables"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "loan_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "customer_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "interest_rate",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "start_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "status",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "loans"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Database')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_transactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_Database",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_SQL_Tables"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "transaction_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "account_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "system_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "type",
+						"type": "varchar"
+					},
+					{
+						"name": "amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "description",
+						"type": "varchar"
+					},
+					{
+						"name": "transact_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "transactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQL_Database')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_parquet_enriched_final')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_DataLake",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_enricheds"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "delta_tables/gold_enriched",
+						"container": "gold"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "loan_id",
+						"type": "INT32"
+					},
+					{
+						"name": "account_id",
+						"type": "INT32"
+					},
+					{
+						"name": "customer_id",
+						"type": "INT32"
+					},
+					{
+						"name": "name",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone_number",
+						"type": "UTF8"
+					},
+					{
+						"name": "email",
+						"type": "UTF8"
+					},
+					{
+						"name": "birth_date",
+						"type": "DATE"
+					},
+					{
+						"name": "street",
+						"type": "UTF8"
+					},
+					{
+						"name": "street_number",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "age",
+						"type": "INT32"
+					},
+					{
+						"name": "has_phone",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "has_email",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "class_of_account",
+						"type": "UTF8"
+					},
+					{
+						"name": "balance",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "opened_date",
+						"type": "DATE"
+					},
+					{
+						"name": "created_date",
+						"type": "DATE"
+					},
+					{
+						"name": "has_opened_date",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "has_created_date",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "has_class_of_account",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "has_balance",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "interest_rate",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "start_date",
+						"type": "DATE"
+					},
+					{
+						"name": "status",
+						"type": "UTF8"
+					},
+					{
+						"name": "loan_amount",
+						"type": "DECIMAL",
+						"precision": 15,
+						"scale": 2
+					},
+					{
+						"name": "has_start_date",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "transaction_id",
+						"type": "INT32"
+					},
+					{
+						"name": "system_date",
+						"type": "DATE"
+					},
+					{
+						"name": "type",
+						"type": "UTF8"
+					},
+					{
+						"name": "amount",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "description",
+						"type": "UTF8"
+					},
+					{
+						"name": "transaction_date",
+						"type": "DATE"
+					},
+					{
+						"name": "date_anomaly",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "payment_id",
+						"type": "INT32"
+					},
+					{
+						"name": "payment_date",
+						"type": "DATE"
+					},
+					{
+						"name": "amount_paid",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "is_amount_paid_null",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "has_payment_date",
+						"type": "BOOLEAN"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_copyenriched to SQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy enriched to SQL",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "LS_DataLake",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "loan_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "loan_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "account_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "account_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "customer_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "customer_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "name",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "name",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "phone_number",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "phone_number",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "email",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "email",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "birth_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "birth_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "street",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "street",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "street_number",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "street_number",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "city",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "city",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "age",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "age",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_phone",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_phone",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_email",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_email",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "class_of_account",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "class_of_account",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "balance",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "balance",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "opened_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "opened_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "created_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "created_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_opened_date",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_opened_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_created_date",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_created_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_class_of_account",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_class_of_account",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_balance",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_balance",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "interest_rate",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "interest_rate",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "start_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "start_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "status",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "status",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "loan_amount",
+											"type": "Decimal",
+											"physicalType": "DECIMAL",
+											"scale": 2,
+											"precision": 15
+										},
+										"sink": {
+											"name": "loan_amount",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_start_date",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_start_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "transaction_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "transaction_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "system_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "system_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "type",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "type",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "amount",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "amount",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "description",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "description",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "transaction_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "transaction_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "date_anomaly",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "date_anomaly",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "payment_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "payment_id",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "payment_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "payment_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "amount_paid",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "amount_paid",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "is_amount_paid_null",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "is_amount_paid_null",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "has_payment_date",
+											"type": "Boolean",
+											"physicalType": "BOOLEAN"
+										},
+										"sink": {
+											"name": "has_payment_date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_parquet_enriched_final",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_CSV_enriched_final",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "fallo en Copy Enriched a SQL",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Copy enriched to SQL",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "PipelineStatus",
+							"value": "fallo en Copy Enriched a SQL"
+						}
+					},
+					{
+						"name": "Finalizacion correcta",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Copy enriched to SQL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "PipelineStatus",
+							"value": "Finalizacion de todos los pipelines correctamente"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"PipelineStatus": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "PL_Loan_Project"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-06-30T22:44:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_parquet_enriched_final')]",
+				"[concat(variables('factoryId'), '/datasets/DS_CSV_enriched_final')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataLake')]"
+			]
+		}
+	]
+}
