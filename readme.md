@@ -56,8 +56,6 @@ Para más información detallada sobre la arquitectura, transformaciones y decis
 
 ---
 
----
-
 
 
 # 🏦 End-to-End ETL Project: Medallion Architecture Applied to Banking Loans (English)
@@ -105,7 +103,7 @@ The **Medallion Architecture** is a multi-layered approach to data processing:
 
 For detailed information about the architecture, transformations, and technical decisions, please refer to the following document:
 
-👉 👉 [Final Project Data Engineer.pdf](https://github.com/user-attachments/files/21026502/Proyecto.Final.Data.Engineer.pdf)
+👉 [Final Project Data Engineer.pdf](https://github.com/user-attachments/files/21026502/Proyecto.Final.Data.Engineer.pdf)
 
 > The document includes diagrams, examples, technical descriptions, and a rationale for the pipeline design choices.
 
