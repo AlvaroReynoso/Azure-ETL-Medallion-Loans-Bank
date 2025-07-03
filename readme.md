@@ -57,7 +57,6 @@ Para más información detallada sobre la arquitectura, transformaciones y decis
 ---
 
 
-
 # 🏦 End-to-End ETL Project: Medallion Architecture Applied to Banking Loans (English)
 
 ## This project implements a **full end-to-end ETL pipeline** using the **Medallion Architecture (Bronze, Silver, Gold)** approach, applied to a **real-world business case in the banking sector**, specifically focused on **loan data**.
