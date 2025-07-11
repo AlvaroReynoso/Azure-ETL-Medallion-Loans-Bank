@@ -108,7 +108,7 @@ For detailed information about the architecture, transformations, and technical 
 
 
 
-## Algunas Capturas / Few Screenshots:
+## Capturas / Screenshots:
 
 ![1](https://github.com/user-attachments/assets/6e701d75-b4cc-4ac5-8cea-63aa50c6f894)
 ![2](https://github.com/user-attachments/assets/19c5ad6b-7427-4d33-9b99-bbf651f4a49d)
