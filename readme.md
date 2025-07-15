@@ -106,7 +106,7 @@ For detailed information about the architecture, transformations, and technical 
 
 > The document includes diagrams, examples, technical descriptions, and a rationale for the pipeline design choices.
 
-
+👉**Video** https://www.youtube.com/watch?v=Oq9o6ZM_k5Q
 
 ## Capturas / Screenshots:
 
