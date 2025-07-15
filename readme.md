@@ -50,9 +50,11 @@ Para más información detallada sobre la arquitectura, transformaciones y decis
 
 👉 [Proyecto Final Data Engineer.pdf](https://github.com/user-attachments/files/21026502/Proyecto.Final.Data.Engineer.pdf)
 
-### 👉**Video explicativo** https://www.youtube.com/watch?v=Oq9o6ZM_k5Q
 
 > Incluye esquemas, ejemplos, descripciones técnicas, y justificación de decisiones a lo largo del pipeline.
+
+
+### 👉**Video explicativo** https://www.youtube.com/watch?v=Oq9o6ZM_k5Q
 
 ---
 
@@ -105,6 +107,7 @@ For detailed information about the architecture, transformations, and technical 
 👉 [Final Project Data Engineer.pdf](https://github.com/user-attachments/files/21026502/Proyecto.Final.Data.Engineer.pdf)
 
 > The document includes diagrams, examples, technical descriptions, and a rationale for the pipeline design choices.
+
 
 ### 👉**Explain video** https://www.youtube.com/watch?v=Oq9o6ZM_k5Q
 
