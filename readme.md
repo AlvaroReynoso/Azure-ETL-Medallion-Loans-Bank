@@ -62,7 +62,7 @@ Para más información detallada sobre la arquitectura, transformaciones y decis
 
 # 🏦 End-to-End ETL Project: Medallion Architecture Applied to Banking Loans (English)
 
-## This project implements a **full end-to-end ETL pipeline** using the **Medallion Architecture (Bronze, Silver, Gold)** approach, applied to a **real-world business case in the banking sector**, specifically focused on **loan data**.
+## This project delivers a full end-to-end ETL pipeline that simulates the complete processing of banking loan data on Microsoft Azure. It leverages Databricks and ADF following a modular Medallion architecture (Bronze, Silver, Gold).
 
 ## 📌 Pipeline Objectives
 - Implement a **modular and scalable** data processing flow.
