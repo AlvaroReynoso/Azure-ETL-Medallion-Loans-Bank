@@ -1,7 +1,7 @@
 # 🏦 Proyecto ETL End-to-End: Modelo Medallón aplicado a Préstamos Bancarios (Español)
 
 
-## Este proyecto implementa un pipeline **ETL de punta a punta** y simula el procesamiento completo de datos de préstamos bancarios en Microsoft Azure. Usa Databricks y ADF en un enfoque modular (Bronze/Silver/Gold)
+## Este proyecto implementa un pipeline ETL de punta a punta, simulando el procesamiento completo de datos de préstamos bancarios en Microsoft Azure. Utiliza Databricks y ADF en un enfoque modular basado en el modelo Medallón (Bronze, Silver, Gold).
 
 ## 📌 Objetivos del pipeline
   -Implementar un flujo modular y escalable de procesamiento de datos.
